@@ -1,0 +1,86 @@
+import os
+
+Model = ExtAPI.DataModel.Project.Model
+Geometry = Model.Geometry
+Material = Model.Materials
+CS = Model.CoordinateSystems
+Mesh = Model.Mesh
+Analysis = Model.Analyses[0]
+Static_Sol = Analysis.Solution
+all_results = Static_Sol.GetChildren(DataModelObjectCategory.Result, True)
+
+Geometry.DisplayStyle = PrototypeDisplayStyleType.BodyColor
+
+#Specify the Export Folder where images are to be saved.
+export_folder = r'C:\Desktop\Images'
+
+#Export Settings
+export = Ansys.Mechanical.Graphics.GraphicsImageExportSettings()
+export.Resolution = GraphicsResolutionType.HighResolution
+export.Height = 1200
+export.Width = 2000
+
+#....
+#Save Materials Image
+Geometry.DisplayStyle =  PrototypeDisplayStyleType.Material
+Tree.Activate(Geometry)
+export.CurrentGraphicsDisplay = False
+export_name = os.path.join(export_folder,"Material")
+ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+Geometry.DisplayStyle = PrototypeDisplayStyleType.BodyColor
+
+if Geometry.SurfaceBodies == True:
+    Geometry.DisplayStyle =  PrototypeDisplayStyleType.ShellThickness
+    Tree.Activate(Geometry)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder, "Thickness Plot")
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+    Geometry.DisplayStyle = PrototypeDisplayStyleType.BodyColor    
+
+#.....
+#Save model, mesh, geometry images
+items = [Model, Geometry, Mesh]
+for item in items:
+    Tree.Activate(item)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder,item.Name)
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+
+
+#....
+#Import Result Images
+for result in all_results:
+    Tree.Activate(result)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder,result.Name)
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+
+
+#....
+#Save Figures
+all_Figure = Model.GetChildren(DataModelObjectCategory.Figure, True)
+for figure in all_Figure:
+    Tree.Activate(figure)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder,figure.Name)
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+
+
+#Save Images
+all_Image = Model.GetChildren(DataModelObjectCategory.Image, True)
+for image in all_Image:
+    Tree.Activate(image)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder,image.Name)
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
+
+bc = []
+for i in Analysis.Children:
+    bc.append(i)
+
+for i in range(1, len(bc)-1):
+    bcs = bc[i]
+    Tree.Activate(bcs)
+    export.CurrentGraphicsDisplay = False
+    export_name = os.path.join(export_folder,bcs.Name)
+    ExtAPI.Graphics.ExportImage(export_name +".png", GraphicsImageExportFormat.PNG,export)
